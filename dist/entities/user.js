@@ -35,12 +35,12 @@ __decorate([
 ], User.prototype, "updatedAt", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
-    (0, core_1.Property)({ nullable: false }),
+    (0, core_1.Property)({ nullable: false, unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "username", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
-    (0, core_1.Property)({ nullable: false }),
+    (0, core_1.Property)({ nullable: false, unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([

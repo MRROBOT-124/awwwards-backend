@@ -20,16 +20,79 @@ const user_1 = require("../../entities/user");
 const type_graphql_1 = require("type-graphql");
 const userDetails_1 = require("../models/userDetails");
 const argon2_1 = __importDefault(require("argon2"));
+const userResponse_1 = require("../models/userResponse");
 let UserResolvers = class UserResolvers {
     getAllUsers({ em }) {
         return em.fork().find(user_1.User, {});
     }
+    async getUser({ em, req }) {
+        if (!req.session.user.email) {
+            console.log("Cookie is not set");
+            return null;
+        }
+        const user = await em.fork().findOne(user_1.User, { email: req.session.user.email });
+        return user;
+    }
     async registerUser(userDetails, { em }) {
+        const passwordRegEX = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+        if (!passwordRegEX.test(userDetails.password)) {
+            return {
+                errors: [
+                    {
+                        field: "Password",
+                        message: "Password must gave special characeters, number and length should also be greater than 8"
+                    }
+                ]
+            };
+        }
         const hashedPassword = await argon2_1.default.hash(userDetails.password);
         userDetails.password = hashedPassword;
         const user = em.fork().create(user_1.User, userDetails);
-        await em.fork().persistAndFlush(user);
-        return user;
+        try {
+            await em.fork().persistAndFlush(user);
+        }
+        catch (err) {
+            if (err.code === '23505' || err.detail.contains("already exists.")) {
+                return {
+                    errors: [
+                        {
+                            field: "Username/Email",
+                            message: "User Already exists"
+                        }
+                    ]
+                };
+            }
+            console.log("Error message: ", err.message);
+        }
+        return { user: user };
+    }
+    async loginUser(userDetails, { em, req }) {
+        const findUser = await em.fork().findOne(user_1.User, { username: userDetails.username });
+        if (!findUser) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "User does not exists"
+                    }
+                ]
+            };
+        }
+        const validate = await argon2_1.default.verify(findUser.password, userDetails.password);
+        if (!validate) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "Invalid Username/Password"
+                    }
+                ]
+            };
+        }
+        req.session.user = {
+            email: findUser.email
+        };
+        return { user: findUser };
     }
 };
 __decorate([
@@ -40,13 +103,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolvers.prototype, "getAllUsers", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => user_1.User),
+    (0, type_graphql_1.Query)(() => user_1.User),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserResolvers.prototype, "getUser", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => userResponse_1.UserResponse),
     __param(0, (0, type_graphql_1.Arg)("websiteInput", () => userDetails_1.UserDetails)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_1.User, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolvers.prototype, "registerUser", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => userResponse_1.UserResponse),
+    __param(0, (0, type_graphql_1.Arg)("websiteInput", () => userDetails_1.UserDetails)),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_1.User, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolvers.prototype, "loginUser", null);
 UserResolvers = __decorate([
     (0, type_graphql_1.Resolver)()
 ], UserResolvers);
