@@ -24,7 +24,7 @@ const main = async () => {
     const redisClient = (0, client_1.createClient)({ legacyMode: true });
     redisClient.connect().catch(console.error);
     app.use((0, cors_1.default)({
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000", "https://studio.apollographql.com"],
         credentials: true
     }));
     app.use((0, express_session_1.default)({

@@ -41,19 +41,16 @@ export class UserResolvers {
 
     @Mutation(() => UserResponse)
     async registerUser(
-        @Arg("websiteInput", () => UserDetails) userDetails: User,
+        @Arg("userDetails", () => UserDetails) userDetails: User,
         @Ctx() {em} : MyContext
     ) {
         const passwordRegEX = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+        let errors = [];
         if(!passwordRegEX.test(userDetails.password)) {
-            return {
-                errors: [
-                    {
-                        field: "Password",
-                        message: "Password must gave special characeters, number and length should also be greater than 8"
-                    }
-                ]
-            } 
+            errors.push({
+                field: "password",
+                message: "Password must gave special characeters, number and length should also be greater than 8"
+            })
         }
         const hashedPassword = await argon2.hash(userDetails.password);
         userDetails.password = hashedPassword
@@ -61,24 +58,26 @@ export class UserResolvers {
         try {
             await em.fork().persistAndFlush(user);
         }catch(err) {
-            if(err.code==='23505' || err.detail.contains("already exists.")) {
-                return {
-                    errors: [
-                        {
-                            field: "Username/Email",
-                            message: "User Already exists"
-                        }
-                    ]
-                }
+            if(err.detail.includes("username") && err.detail.includes("already exists.")) {
+                errors.push({
+                    field: "username",
+                    message: "Username Already exists"
+                });
             }
-            console.log("Error message: ", err.message);
+            if(err.detail.includes("email") && err.detail.includes("already exists.")) {
+                errors.push({
+                    field: "email",
+                    message: "Email Already exists"
+                })
+            }
+            
         }
-        return {user: user};
+        return {user: user, errors: errors};
     }
 
     @Mutation(() => UserResponse)
     async loginUser(
-        @Arg("websiteInput", () => UserDetails) userDetails: User,
+        @Arg("userDetails", () => UserDetails) userDetails: User,
         @Ctx() {em, req} : MyContext
     ) {
         const findUser = await em.fork().findOne(User, {username: userDetails.username});

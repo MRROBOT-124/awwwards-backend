@@ -35,15 +35,12 @@ let UserResolvers = class UserResolvers {
     }
     async registerUser(userDetails, { em }) {
         const passwordRegEX = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+        let errors = [];
         if (!passwordRegEX.test(userDetails.password)) {
-            return {
-                errors: [
-                    {
-                        field: "Password",
-                        message: "Password must gave special characeters, number and length should also be greater than 8"
-                    }
-                ]
-            };
+            errors.push({
+                field: "password",
+                message: "Password must gave special characeters, number and length should also be greater than 8"
+            });
         }
         const hashedPassword = await argon2_1.default.hash(userDetails.password);
         userDetails.password = hashedPassword;
@@ -52,19 +49,20 @@ let UserResolvers = class UserResolvers {
             await em.fork().persistAndFlush(user);
         }
         catch (err) {
-            if (err.code === '23505' || err.detail.contains("already exists.")) {
-                return {
-                    errors: [
-                        {
-                            field: "Username/Email",
-                            message: "User Already exists"
-                        }
-                    ]
-                };
+            if (err.detail.includes("username") && err.detail.includes("already exists.")) {
+                errors.push({
+                    field: "username",
+                    message: "Username Already exists"
+                });
             }
-            console.log("Error message: ", err.message);
+            if (err.detail.includes("email") && err.detail.includes("already exists.")) {
+                errors.push({
+                    field: "email",
+                    message: "Email Already exists"
+                });
+            }
         }
-        return { user: user };
+        return { user: user, errors: errors };
     }
     async loginUser(userDetails, { em, req }) {
         const findUser = await em.fork().findOne(user_1.User, { username: userDetails.username });
@@ -111,7 +109,7 @@ __decorate([
 ], UserResolvers.prototype, "getUser", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => userResponse_1.UserResponse),
-    __param(0, (0, type_graphql_1.Arg)("websiteInput", () => userDetails_1.UserDetails)),
+    __param(0, (0, type_graphql_1.Arg)("userDetails", () => userDetails_1.UserDetails)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_1.User, Object]),
@@ -119,7 +117,7 @@ __decorate([
 ], UserResolvers.prototype, "registerUser", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => userResponse_1.UserResponse),
-    __param(0, (0, type_graphql_1.Arg)("websiteInput", () => userDetails_1.UserDetails)),
+    __param(0, (0, type_graphql_1.Arg)("userDetails", () => userDetails_1.UserDetails)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_1.User, Object]),
