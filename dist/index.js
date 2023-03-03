@@ -21,7 +21,13 @@ const main = async () => {
     await orm.getMigrator().up();
     const app = (0, express_1.default)();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
-    const redisClient = (0, client_1.createClient)({ legacyMode: true });
+    const redisClient = (0, client_1.createClient)({
+        legacyMode: true,
+        socket: {
+            host: 'redis',
+            port: 6379
+        }
+    });
     redisClient.connect().catch(console.error);
     app.use((0, cors_1.default)({
         origin: ["http://localhost:3000", "https://studio.apollographql.com"],
@@ -31,7 +37,7 @@ const main = async () => {
         name: "email",
         store: new RedisStore({
             client: redisClient,
-            disableTouch: true
+            disableTouch: true,
         }),
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,

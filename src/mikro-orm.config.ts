@@ -7,6 +7,7 @@ import { Website } from "./entities/website";
 
 export default {
     entities: [User, Website, Tags],
+    host: 'postgres',
     dbName: 'awwwards',
     user: 'postgres',
     password: 'A!m@12ith',

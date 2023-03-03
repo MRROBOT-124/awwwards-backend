@@ -65,16 +65,19 @@ let UserResolvers = class UserResolvers {
         return { user: user, errors: errors };
     }
     async loginUser(userDetails, { em, req }) {
-        const findUser = await em.fork().findOne(user_1.User, { username: userDetails.username });
+        let findUser = await em.fork().findOne(user_1.User, { username: userDetails.username });
         if (!findUser) {
-            return {
-                errors: [
-                    {
-                        field: "username",
-                        message: "User does not exists"
-                    }
-                ]
-            };
+            findUser = await em.fork().findOne(user_1.User, { email: userDetails.email });
+            if (!findUser) {
+                return {
+                    errors: [
+                        {
+                            field: "username",
+                            message: "User does not exists"
+                        }
+                    ]
+                };
+            }
         }
         const validate = await argon2_1.default.verify(findUser.password, userDetails.password);
         if (!validate) {

@@ -10,6 +10,7 @@ const user_1 = require("./entities/user");
 const website_1 = require("./entities/website");
 exports.default = {
     entities: [user_1.User, website_1.Website, tags_1.Tags],
+    host: 'postgres',
     dbName: 'awwwards',
     user: 'postgres',
     password: 'A!m@12ith',

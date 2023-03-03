@@ -34,12 +34,12 @@ __decorate([
     (0, type_graphql_1.Field)(),
     (0, core_1.Property)(),
     __metadata("design:type", String)
-], Website.prototype, "name", void 0);
+], Website.prototype, "webisteName", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, core_1.Property)(),
     __metadata("design:type", String)
-], Website.prototype, "company", void 0);
+], Website.prototype, "companyName", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, core_1.Property)(),

@@ -80,16 +80,20 @@ export class UserResolvers {
         @Arg("userDetails", () => UserDetails) userDetails: User,
         @Ctx() {em, req} : MyContext
     ) {
-        const findUser = await em.fork().findOne(User, {username: userDetails.username});
+        let findUser = await em.fork().findOne(User, {username: userDetails.username});
         if(!findUser) {
-            return {
-                errors: [
-                    {
-                        field: "username",
-                        message: "User does not exists"
-                    }
-                ]
+            findUser = await em.fork().findOne(User, {email: userDetails.email});
+            if(!findUser) {
+                return {
+                    errors: [
+                        {
+                            field: "username",
+                            message: "User does not exists"
+                        }
+                    ]
+                }
             }
+            
         }
         const validate = await argon2.verify(findUser.password,userDetails.password);
         if(!validate) {

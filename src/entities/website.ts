@@ -16,11 +16,11 @@ export class Website {
 
     @Field()
     @Property()
-    name!: string
+    webisteName!: string
 
     @Field()
     @Property()
-    company!: string
+    companyName!: string
 
     @Field()
     @Property()
@@ -38,7 +38,6 @@ export class Website {
     @Property({ onUpdate: () => new Date() })
     updatedAt: Date = new Date();
 
-    // @Field(() => [Tags])
     @ManyToMany(() => Tags, tags => tags.websitesList, {owner: true})
     tagsList = new Collection<Tags>(this);
 

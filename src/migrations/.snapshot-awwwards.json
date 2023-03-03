@@ -183,8 +183,8 @@
           "nullable": false,
           "mappedType": "text"
         },
-        "name": {
-          "name": "name",
+        "webiste_name": {
+          "name": "webiste_name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -192,8 +192,8 @@
           "nullable": false,
           "mappedType": "string"
         },
-        "company": {
-          "name": "company",
+        "company_name": {
+          "name": "company_name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,

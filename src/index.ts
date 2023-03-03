@@ -20,7 +20,15 @@ const main =async () => {
     const app = express();
 
     const RedisStore = connectRedis(session);
-    const redisClient : any = createClient({legacyMode: true});
+    const redisClient : any = createClient(
+      {
+        legacyMode: true,
+        socket: {
+          host: 'redis',
+          port: 6379
+        }
+      }
+    );
     redisClient.connect().catch(console.error);
 
     app.use(cors({
@@ -33,7 +41,8 @@ const main =async () => {
            name: "email",
           store: new RedisStore({
             client: redisClient,
-            disableTouch: true
+            disableTouch: true,
+            
           }),
           cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
@@ -44,6 +53,7 @@ const main =async () => {
           saveUninitialized: false,
           secret: "adqwieqkpasldkaodkadkrerwasdada",
           resave: false,
+        
         })
       )
     

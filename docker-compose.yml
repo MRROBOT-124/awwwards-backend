@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  postgres:
+    image: 'postgres'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=A!m@12ith
+      - POSTGRES_DB=awwwards
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d A!m@12ith'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  redis:
+    image: 'redis'
+    ports:
+      - 6379:6379
+  awwards-backend:
+    build: .
+    links:
+      - postgres
+      - redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 4000:4000
+
+  
