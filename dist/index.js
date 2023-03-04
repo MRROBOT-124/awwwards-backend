@@ -16,7 +16,9 @@ const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const client_1 = require("@redis/client");
 const cors_1 = __importDefault(require("cors"));
+const envConfig_1 = __importDefault(require("./envConfig"));
 const main = async () => {
+    console.log(envConfig_1.default);
     const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
     await orm.getMigrator().up();
     const app = (0, express_1.default)();
@@ -24,7 +26,7 @@ const main = async () => {
     const redisClient = (0, client_1.createClient)({
         legacyMode: true,
         socket: {
-            host: 'redis',
+            host: process.env.REDIS_HOST,
             port: 6379
         }
     });

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { MikroORM } from '@mikro-orm/core'
-import { __prod__ } from './constants';
+import { __ENV__, __prod__ } from './constants';
 import mikroOrmConfig from './mikro-orm.config';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
@@ -12,19 +12,26 @@ import connectRedis from 'connect-redis';
 import { MyContext } from './types';
 import { createClient } from '@redis/client';
 import cors from 'cors';
+import envConfig from './envConfig';
 
-const main =async () => {
+
+const main = async () => {
+
+
+    console.log(envConfig);
     const orm = await MikroORM.init(mikroOrmConfig);
 
     await orm.getMigrator().up();
     const app = express();
+
+    
 
     const RedisStore = connectRedis(session);
     const redisClient : any = createClient(
       {
         legacyMode: true,
         socket: {
-          host: 'redis',
+          host: process.env.REDIS_HOST,
           port: 6379
         }
       }

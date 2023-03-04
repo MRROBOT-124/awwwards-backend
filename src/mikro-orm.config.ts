@@ -4,10 +4,14 @@ import { __prod__ } from "./constants";
 import { Tags } from "./entities/tags";
 import { User } from "./entities/user";
 import { Website } from "./entities/website";
+import envConfig from "./envConfig";
+
+
+console.log(envConfig);
 
 export default {
     entities: [User, Website, Tags],
-    host: 'postgres',
+    host: process.env.POSTGRES_HOST,
     dbName: 'awwwards',
     user: 'postgres',
     password: 'A!m@12ith',
